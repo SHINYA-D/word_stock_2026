@@ -1,0 +1,69 @@
+# 自動生成系(githubに上げる必要がない)
+*.class
+*.log
+*.pyc
+*.swp
+.DS_Store
+.atom/
+.build/
+.buildlog/
+.history
+.svn/
+.swiftpm/
+migrate_working_dir/
+
+# IDE設定(githubに上げる必要がない)
+*.iml
+*.ipr
+*.iws
+.idea/
+
+# VsCode設定(githubに上げる必要がない)
+.vscode/
+
+# Flutter/dart自動生成系(githubに上げる必要がない)
+**/doc/api/
+**/ios/Flutter/.last_build_id
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.pub-cache/
+.pub/
+/build/
+
+# Symbolication / Obfuscation（クラッシュ解析用・ビルド時自動生成）
+app.*.symbols
+app.*.map.json
+
+# Android関連
+/android/app/debug
+/android/app/profile
+/android/app/release
+/android/app/src/debug
+/android/app/src/profile
+/android/app/src/release
+android/key.properties
+*.keystore
+*.jks
+android/local.properties
+
+# ios関連
+*.p12
+*.mobileprovision
+
+# 設定関連
+.env
+.env.*
+!.env.example
+dart_define_dev.env
+
+# Firebase
+lib/firebase_options.dart
+**/google-services.json
+**/GoogleService-Info.plist
+
+# Test関連
+coverage/
+
+# FVM Version Cache
+.fvm/
