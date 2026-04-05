@@ -44,8 +44,8 @@ UseCase レイヤーを設けることで、ビジネスロジックの独立性
 #### 各レイヤーの責務
 | レイヤー | 責務 | 主な構成要素 |
 |---------|------|------------|
-| presentation | 画面表示・ユーザー操作の受付 | Page / Widget / ViewModel (Notifier) / State (Freezed) |
-| application | ユースケースの実行・ドメインの調整 | UseCase クラス |
+| presentation | 画面表示・ユーザー操作の受付 | Page / Widget / ViewModel (Notifier) / State |
+| application | ユースケースの実行 | UseCase クラス |
 | domain | ビジネスロジック・ルールの定義 | Entity / Repository（interface） |
 | infrastructure | 外部サービスとの通信・データ変換 | RepositoryImpl / DataSource |
 
@@ -53,7 +53,7 @@ UseCase レイヤーを設けることで、ビジネスロジックの独立性
 - `domain` 層は他のどの層にも依存しない
 - `application` 層は `domain` 層のみに依存する
 - `presentation` 層は `application` / `domain` 層に依存する
-- `infrastructure` 層は `domain` 層のインターフェースを実装する
+- `infrastructure` 層は `domain` 層（インターフェース / エンティティ）に依存する
 - 依存性の注入（DI）は Riverpod で管理する（`core/di/` 配下の Provider 経由）
 
 ### 技術選定：Riverpod + Freezed
