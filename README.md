@@ -52,13 +52,20 @@ FVMは公式で調べて実施してください。
 
 ④ FVMにて、Flutter SDK をインストールする
 ```
-fvm install
+fvm install 3.41.5
 ```
-⑤ 依存パッケージを取得する
+
+⑤ FVMにて、使用する Flutter バージョンを指定する
+```
+fvm use 3.41.5
+```
+
+⑥ 依存パッケージを取得する
 ```
 fvm flutter pub get
 ```
-⑥ ビルドを行う。以下どちらかの方法で起動する
+
+⑦ ビルドを行う。以下どちらかの方法で起動する
 
 **ターミナルから起動する場合:**
 ```
@@ -81,20 +88,28 @@ fvm flutter run --dart-define=USE_MOCKS=true
 
 ⑥ FVMにて、Flutter SDK をインストールする
 ```
-fvm install
+fvm install 3.41.5
 ```
-⑦ FlutterFire CLI をインストールする
+
+⑦ FVMにて、使用する Flutter バージョンを指定する
+```
+fvm use 3.41.5
+```
+
+⑧ FlutterFire CLI をインストールする
 ```
 fvm dart pub global activate flutterfire_cli
 ```
 > `flutterfire`コマンドが見つからない場合は`~/.pub-cache/bin`にPATHが通っているか確認してください。
 
-⑧ Firebase にログインし、設定ファイルを生成する（`lib/firebase_options.dart` が生成される）
+
+⑨ Firebase にログインし、設定ファイルを生成する（`lib/firebase_options.dart` が生成される）
 ```
 firebase login
 flutterfire configure
 ```
-⑨ Firebaseコンソールから各ファイルをダウンロードして配置する
+
+⑩ Firebaseコンソールから各ファイルをダウンロードして配置する
 
 Firebaseコンソール > 設定 > 全般 > 一番下までスクロール後、各ファイルをダウンロード
 
@@ -106,13 +121,15 @@ Firebaseコンソール > 設定 > 全般 > 一番下までスクロール後、
 ```
 /word_stock_2026/ios/Runner/GoogleService-Info.plist
 ```
-⑩ 環境変数の設定ファイルを配置する（担当者からもらってください）
 
-⑪ 依存パッケージを取得する
+⑪ 環境変数の設定ファイルを配置する（担当者からもらってください）
+
+⑫ 依存パッケージを取得する
 ```
 fvm flutter pub get
 ```
-⑫ ビルドを実行する
+
+⑬ ビルドを実行する
 ```
 fvm flutter run
 ```
