@@ -85,6 +85,7 @@ class DataResultViewModel extends ResultViewModel {
           totalCount: 3,
           correctCount: 2,
           date: DateTime(2024, 1, 1),
+          updatedAt: DateTime(2024, 1, 1),
         ),
         TestResult(
           id: 'r2',
@@ -92,6 +93,7 @@ class DataResultViewModel extends ResultViewModel {
           totalCount: 2,
           correctCount: 2,
           date: DateTime(2024, 1, 2),
+          updatedAt: DateTime(2024, 1, 2),
         ),
       ];
 }
