@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:word_stock_2026/core/di/firebase_providers.dart';
+import 'package:word_stock_2026/core/di/local_data_source_providers.dart';
 import 'package:word_stock_2026/domain/repositories/auth_repository.dart';
 import 'package:word_stock_2026/domain/repositories/folder_repository.dart';
 import 'package:word_stock_2026/domain/repositories/settings_repository.dart';
@@ -33,23 +34,49 @@ AuthRepository authRepository(Ref ref) {
 @Riverpod(keepAlive: true)
 FolderRepository folderRepository(Ref ref) {
   if (kUseMocks) return MockFolderRepository();
-  return FolderRepositoryImpl(ref.watch(firestoreDataSourceProvider));
+  return FolderRepositoryImpl(
+    localDataSource: ref.watch(folderLocalDataSourceProvider),
+    wordLocalDataSource: ref.watch(wordLocalDataSourceProvider),
+    testResultLocalDataSource: ref.watch(testResultLocalDataSourceProvider),
+    remoteDataSource: ref.watch(firestoreDataSourceProvider),
+    syncQueueDataSource: ref.watch(syncQueueDataSourceProvider),
+    dbHelper: ref.watch(databaseHelperProvider),
+    connectivityMonitor: ref.watch(connectivityMonitorProvider),
+  );
 }
 
 @Riverpod(keepAlive: true)
 WordRepository wordRepository(Ref ref) {
   if (kUseMocks) return MockWordRepository();
-  return WordRepositoryImpl(ref.watch(firestoreDataSourceProvider));
+  return WordRepositoryImpl(
+    localDataSource: ref.watch(wordLocalDataSourceProvider),
+    remoteDataSource: ref.watch(firestoreDataSourceProvider),
+    syncQueueDataSource: ref.watch(syncQueueDataSourceProvider),
+    dbHelper: ref.watch(databaseHelperProvider),
+    connectivityMonitor: ref.watch(connectivityMonitorProvider),
+  );
 }
 
 @Riverpod(keepAlive: true)
 TestResultRepository testResultRepository(Ref ref) {
   if (kUseMocks) return MockTestResultRepository();
-  return TestResultRepositoryImpl(ref.watch(firestoreDataSourceProvider));
+  return TestResultRepositoryImpl(
+    localDataSource: ref.watch(testResultLocalDataSourceProvider),
+    remoteDataSource: ref.watch(firestoreDataSourceProvider),
+    syncQueueDataSource: ref.watch(syncQueueDataSourceProvider),
+    dbHelper: ref.watch(databaseHelperProvider),
+    connectivityMonitor: ref.watch(connectivityMonitorProvider),
+  );
 }
 
 @Riverpod(keepAlive: true)
 SettingsRepository settingsRepository(Ref ref) {
   if (kUseMocks) return MockSettingsRepository();
-  return SettingsRepositoryImpl(ref.watch(firestoreDataSourceProvider));
+  return SettingsRepositoryImpl(
+    localDataSource: ref.watch(settingsLocalDataSourceProvider),
+    remoteDataSource: ref.watch(firestoreDataSourceProvider),
+    syncQueueDataSource: ref.watch(syncQueueDataSourceProvider),
+    dbHelper: ref.watch(databaseHelperProvider),
+    connectivityMonitor: ref.watch(connectivityMonitorProvider),
+  );
 }

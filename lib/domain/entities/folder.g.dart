@@ -11,6 +11,7 @@ _Folder _$FolderFromJson(Map<String, dynamic> json) => _Folder(
       name: json['name'] as String,
       parentFolderId: json['parentFolderId'] as String?,
       createdAt: DateTime.parse(json['createdAt'] as String),
+      updatedAt: DateTime.parse(json['updatedAt'] as String),
     );
 
 Map<String, dynamic> _$FolderToJson(_Folder instance) => <String, dynamic>{
@@ -18,4 +19,5 @@ Map<String, dynamic> _$FolderToJson(_Folder instance) => <String, dynamic>{
       'name': instance.name,
       'parentFolderId': instance.parentFolderId,
       'createdAt': instance.createdAt.toIso8601String(),
+      'updatedAt': instance.updatedAt.toIso8601String(),
     };

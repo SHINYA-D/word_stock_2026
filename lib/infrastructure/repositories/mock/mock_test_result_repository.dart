@@ -18,6 +18,7 @@ class MockTestResultRepository implements TestResultRepository {
         totalCount: 3,
         correctCount: 2,
         date: DateTime.now().subtract(const Duration(days: 1)),
+        updatedAt: DateTime.now().subtract(const Duration(days: 1)),
       ),
       TestResult(
         id: 'result-2',
@@ -25,6 +26,7 @@ class MockTestResultRepository implements TestResultRepository {
         totalCount: 2,
         correctCount: 2,
         date: DateTime.now().subtract(const Duration(hours: 3)),
+        updatedAt: DateTime.now().subtract(const Duration(hours: 3)),
       ),
     ];
   }
@@ -53,12 +55,14 @@ class MockTestResultRepository implements TestResultRepository {
     required int correctCount,
   }) async {
     await Future.delayed(const Duration(milliseconds: 200));
+    final now = DateTime.now();
     final result = TestResult(
       id: 'result-${_idCounter++}',
       folderId: folderId,
       totalCount: totalCount,
       correctCount: correctCount,
-      date: DateTime.now(),
+      date: now,
+      updatedAt: now,
     );
     _store.putIfAbsent(userId, () => []).add(result);
     return Right(result);

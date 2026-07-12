@@ -37,6 +37,12 @@ dependencies:
   # 日付フォーマット
   intl: ^0.19.0
 
+  # ローカルDB・ネットワーク監視
+  sqflite: ^2.3.0
+  path: ^1.8.0
+  connectivity_plus: ^5.0.0
+  uuid: ^4.3.3
+
   # スプラッシュ画面
   flutter_native_splash: ^2.4.3
 
@@ -59,6 +65,7 @@ dev_dependencies:
 
   # テスト
   mockito: ^5.4.5
+  sqflite_common_ffi: ^2.4.0+3
 
 flutter:
   uses-material-design: true

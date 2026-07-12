@@ -16,6 +16,7 @@ T _$identity<T>(T value) => value;
 mixin _$UserSettings {
   String get colorTheme;
   bool get darkMode;
+  DateTime? get updatedAt;
 
   /// Create a copy of UserSettings
   /// with the given fields replaced by the non-null parameter values.
@@ -33,15 +34,17 @@ mixin _$UserSettings {
             (identical(other.colorTheme, colorTheme) ||
                 other.colorTheme == colorTheme) &&
             (identical(other.darkMode, darkMode) ||
-                other.darkMode == darkMode));
+                other.darkMode == darkMode) &&
+            (identical(other.updatedAt, updatedAt) ||
+                other.updatedAt == updatedAt));
   }
 
   @override
-  int get hashCode => Object.hash(runtimeType, colorTheme, darkMode);
+  int get hashCode => Object.hash(runtimeType, colorTheme, darkMode, updatedAt);
 
   @override
   String toString() {
-    return 'UserSettings(colorTheme: $colorTheme, darkMode: $darkMode)';
+    return 'UserSettings(colorTheme: $colorTheme, darkMode: $darkMode, updatedAt: $updatedAt)';
   }
 }
 
@@ -51,7 +54,7 @@ abstract mixin class $UserSettingsCopyWith<$Res> {
           UserSettings value, $Res Function(UserSettings) _then) =
       _$UserSettingsCopyWithImpl;
   @useResult
-  $Res call({String colorTheme, bool darkMode});
+  $Res call({String colorTheme, bool darkMode, DateTime? updatedAt});
 }
 
 /// @nodoc
@@ -68,6 +71,7 @@ class _$UserSettingsCopyWithImpl<$Res> implements $UserSettingsCopyWith<$Res> {
   $Res call({
     Object? colorTheme = null,
     Object? darkMode = null,
+    Object? updatedAt = freezed,
   }) {
     return _then(_self.copyWith(
       colorTheme: null == colorTheme
@@ -78,6 +82,10 @@ class _$UserSettingsCopyWithImpl<$Res> implements $UserSettingsCopyWith<$Res> {
           ? _self.darkMode
           : darkMode // ignore: cast_nullable_to_non_nullable
               as bool,
+      updatedAt: freezed == updatedAt
+          ? _self.updatedAt
+          : updatedAt // ignore: cast_nullable_to_non_nullable
+              as DateTime?,
     ));
   }
 }
@@ -175,13 +183,14 @@ extension UserSettingsPatterns on UserSettings {
 
   @optionalTypeArgs
   TResult maybeWhen<TResult extends Object?>(
-    TResult Function(String colorTheme, bool darkMode)? $default, {
+    TResult Function(String colorTheme, bool darkMode, DateTime? updatedAt)?
+        $default, {
     required TResult orElse(),
   }) {
     final _that = this;
     switch (_that) {
       case _UserSettings() when $default != null:
-        return $default(_that.colorTheme, _that.darkMode);
+        return $default(_that.colorTheme, _that.darkMode, _that.updatedAt);
       case _:
         return orElse();
     }
@@ -202,12 +211,13 @@ extension UserSettingsPatterns on UserSettings {
 
   @optionalTypeArgs
   TResult when<TResult extends Object?>(
-    TResult Function(String colorTheme, bool darkMode) $default,
+    TResult Function(String colorTheme, bool darkMode, DateTime? updatedAt)
+        $default,
   ) {
     final _that = this;
     switch (_that) {
       case _UserSettings():
-        return $default(_that.colorTheme, _that.darkMode);
+        return $default(_that.colorTheme, _that.darkMode, _that.updatedAt);
       case _:
         throw StateError('Unexpected subclass');
     }
@@ -227,12 +237,13 @@ extension UserSettingsPatterns on UserSettings {
 
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>(
-    TResult? Function(String colorTheme, bool darkMode)? $default,
+    TResult? Function(String colorTheme, bool darkMode, DateTime? updatedAt)?
+        $default,
   ) {
     final _that = this;
     switch (_that) {
       case _UserSettings() when $default != null:
-        return $default(_that.colorTheme, _that.darkMode);
+        return $default(_that.colorTheme, _that.darkMode, _that.updatedAt);
       case _:
         return null;
     }
@@ -242,7 +253,8 @@ extension UserSettingsPatterns on UserSettings {
 /// @nodoc
 
 class _UserSettings implements UserSettings {
-  const _UserSettings({this.colorTheme = 'indigo', this.darkMode = false});
+  const _UserSettings(
+      {this.colorTheme = 'indigo', this.darkMode = false, this.updatedAt});
 
   @override
   @JsonKey()
@@ -250,6 +262,8 @@ class _UserSettings implements UserSettings {
   @override
   @JsonKey()
   final bool darkMode;
+  @override
+  final DateTime? updatedAt;
 
   /// Create a copy of UserSettings
   /// with the given fields replaced by the non-null parameter values.
@@ -267,15 +281,17 @@ class _UserSettings implements UserSettings {
             (identical(other.colorTheme, colorTheme) ||
                 other.colorTheme == colorTheme) &&
             (identical(other.darkMode, darkMode) ||
-                other.darkMode == darkMode));
+                other.darkMode == darkMode) &&
+            (identical(other.updatedAt, updatedAt) ||
+                other.updatedAt == updatedAt));
   }
 
   @override
-  int get hashCode => Object.hash(runtimeType, colorTheme, darkMode);
+  int get hashCode => Object.hash(runtimeType, colorTheme, darkMode, updatedAt);
 
   @override
   String toString() {
-    return 'UserSettings(colorTheme: $colorTheme, darkMode: $darkMode)';
+    return 'UserSettings(colorTheme: $colorTheme, darkMode: $darkMode, updatedAt: $updatedAt)';
   }
 }
 
@@ -287,7 +303,7 @@ abstract mixin class _$UserSettingsCopyWith<$Res>
       __$UserSettingsCopyWithImpl;
   @override
   @useResult
-  $Res call({String colorTheme, bool darkMode});
+  $Res call({String colorTheme, bool darkMode, DateTime? updatedAt});
 }
 
 /// @nodoc
@@ -305,6 +321,7 @@ class __$UserSettingsCopyWithImpl<$Res>
   $Res call({
     Object? colorTheme = null,
     Object? darkMode = null,
+    Object? updatedAt = freezed,
   }) {
     return _then(_UserSettings(
       colorTheme: null == colorTheme
@@ -315,6 +332,10 @@ class __$UserSettingsCopyWithImpl<$Res>
           ? _self.darkMode
           : darkMode // ignore: cast_nullable_to_non_nullable
               as bool,
+      updatedAt: freezed == updatedAt
+          ? _self.updatedAt
+          : updatedAt // ignore: cast_nullable_to_non_nullable
+              as DateTime?,
     ));
   }
 }

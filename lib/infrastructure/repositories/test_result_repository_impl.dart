@@ -1,26 +1,45 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:fpdart/fpdart.dart';
+import 'package:uuid/uuid.dart';
 import 'package:word_stock_2026/core/error/failure.dart';
 import 'package:word_stock_2026/domain/entities/test_result.dart';
 import 'package:word_stock_2026/domain/repositories/test_result_repository.dart';
 import 'package:word_stock_2026/infrastructure/data_sources/firestore_data_source.dart';
+import 'package:word_stock_2026/infrastructure/data_sources/local/database_helper.dart';
+import 'package:word_stock_2026/infrastructure/data_sources/local/sync_queue_data_source.dart';
+import 'package:word_stock_2026/infrastructure/data_sources/local/tables/test_result_table.dart';
+import 'package:word_stock_2026/infrastructure/data_sources/local/test_result_local_data_source.dart';
+import 'package:word_stock_2026/infrastructure/data_sources/network/connectivity_monitor.dart';
 
 class TestResultRepositoryImpl implements TestResultRepository {
-  TestResultRepositoryImpl(this._dataSource);
+  TestResultRepositoryImpl({
+    required TestResultLocalDataSource localDataSource,
+    required FirestoreDataSource remoteDataSource,
+    required SyncQueueDataSource syncQueueDataSource,
+    required DatabaseHelper dbHelper,
+    required ConnectivityMonitor connectivityMonitor,
+  })  : _local = localDataSource,
+        _remote = remoteDataSource,
+        _syncQueue = syncQueueDataSource,
+        _dbHelper = dbHelper,
+        _connectivity = connectivityMonitor;
 
-  final FirestoreDataSource _dataSource;
+  final TestResultLocalDataSource _local;
+  final FirestoreDataSource _remote;
+  final SyncQueueDataSource _syncQueue;
+  final DatabaseHelper _dbHelper;
+  final ConnectivityMonitor _connectivity;
+
+  static const _uuid = Uuid();
 
   @override
   Future<Either<Failure, List<TestResult>>> getTestResults({
     required String userId,
+    String? folderId,
   }) async {
     try {
-      final data = await _dataSource.getTestResults(
-        userId: userId,
-      );
-      return Right(data.map(_fromMap).toList());
-    } on FirebaseException catch (e) {
-      return Left(_mapException(e));
+      final results = await _local.findByUserId(userId, folderId: folderId);
+      return Right(results);
     } catch (e) {
       return Left(Failure.unknown(e.toString()));
     }
@@ -34,29 +53,57 @@ class TestResultRepositoryImpl implements TestResultRepository {
     required int correctCount,
   }) async {
     try {
-      final data = await _dataSource.saveTestResult(
-        userId: userId,
+      final now = DateTime.now();
+      final result = TestResult(
+        id: _uuid.v4(),
         folderId: folderId,
         totalCount: totalCount,
         correctCount: correctCount,
+        date: now,
+        updatedAt: now,
       );
-      return Right(_fromMap(data));
+      final isOnline = await _connectivity.isOnline();
+
+      if (isOnline) {
+        await _local.insert(result, userId: userId, syncStatus: 'synced');
+        await _remote.writeTestResult(result, userId);
+      } else {
+        final db = await _dbHelper.database;
+        await db.transaction((txn) async {
+          await txn.insert(
+            TestResultTable.tableName,
+            {
+              'id': result.id,
+              'folderId': result.folderId,
+              'totalCount': result.totalCount,
+              'correctCount': result.correctCount,
+              'date': result.date.toIso8601String(),
+              'userId': userId,
+              'updatedAt': result.updatedAt.toIso8601String(),
+              'syncStatus': 'pending',
+            },
+          );
+          await _syncQueue.enqueueInTransaction(
+            txn,
+            operation: 'create',
+            tableName: TestResultTable.tableName,
+            recordId: result.id,
+            payload: {
+              'folderId': result.folderId,
+              'totalCount': result.totalCount,
+              'correctCount': result.correctCount,
+              'date': result.date.toIso8601String(),
+              'updatedAt': result.updatedAt.toIso8601String(),
+            },
+          );
+        });
+      }
+      return Right(result);
     } on FirebaseException catch (e) {
       return Left(_mapException(e));
     } catch (e) {
       return Left(Failure.unknown(e.toString()));
     }
-  }
-
-  TestResult _fromMap(Map<String, dynamic> map) {
-    final date = map['date'];
-    return TestResult(
-      id: map['id'] as String,
-      folderId: map['folderId'] as String,
-      totalCount: map['totalCount'] as int,
-      correctCount: map['correctCount'] as int,
-      date: date is Timestamp ? date.toDate() : DateTime.now(),
-    );
   }
 
   Failure _mapException(FirebaseException e) {

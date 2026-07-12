@@ -10,6 +10,7 @@ abstract class TestResult with _$TestResult {
     required int totalCount,
     required int correctCount,
     required DateTime date,
+    required DateTime updatedAt,
   }) = _TestResult;
 
   const TestResult._();

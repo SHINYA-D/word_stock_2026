@@ -7,5 +7,6 @@ abstract class UserSettings with _$UserSettings {
   const factory UserSettings({
     @Default('indigo') String colorTheme,
     @Default(false) bool darkMode,
+    DateTime? updatedAt,
   }) = _UserSettings;
 }

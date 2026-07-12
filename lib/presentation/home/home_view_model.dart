@@ -28,6 +28,7 @@ class HomeViewModel extends _$HomeViewModel {
       (folders) {
         state = state.copyWith(
           folders: AsyncValue.data(folders),
+          
         );
       },
     );
