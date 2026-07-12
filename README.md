@@ -29,7 +29,7 @@ UseCase レイヤーを設けることで、ビジネスロジックの独立性
 | presentation | 画面表示・ユーザー操作の受付 | Page / Widget / ViewModel (Notifier) / State |
 | application | ユースケースの実行 | UseCase クラス |
 | domain | ビジネスロジック・ルールの定義 | Entity / Repository（interface） |
-| infrastructure | 外部サービスとの通信・データ変換 | RepositoryImpl / DataSource |
+| infrastructure | 外部サービスとの通信・データ変換 | RepositoryImpl / DataSource（Firebase・SQLiteローカルDB）/ 同期サービス |
 
 #### 依存関係ルール
 - `domain` 層は他のどの層にも依存しない
@@ -42,6 +42,11 @@ UseCase レイヤーを設けることで、ビジネスロジックの独立性
 - **Riverpod**：グローバルな状態管理の柔軟性と、DI（依存性注入）によるテスタビリティの向上
 - **Freezed**：コード自動生成（Generator）によるボイラープレートの削減と型安全性の確保
 - この組み合わせにより、安全性・生産性・テスト容易性を両立しています
+
+### オフライン同期対応
+SQLite（sqflite）をローカルキャッシュとして導入し、UI層は常にSQLiteから読み取ることでオンライン/オフラインを意識しない設計にしています。
+書き込み時はデータテーブルへの反映と `sync_queue` テーブルへの同期予約を同一トランザクションで行い、`connectivity_plus` によるネットワーク監視と組み合わせて未送信データをFirestoreへ同期します。
+同期フロー・競合解決の詳細は [docs/online_offline.md](docs/online_offline.md) を参照してください。
 
 ### テスト方針
 本プロジェクトのテストは、CI/CD パイプラインの実働証明を主目的としています。
@@ -60,9 +65,10 @@ UseCase レイヤーを設けることで、ビジネスロジックの独立性
 | コード生成 | Freezed / build_runner |
 | アーキテクチャ | クリーンアーキテクチャ（DDD） |
 | バックエンド | Firebase（Firestore / Authentication） |
+| ローカルDB・オフライン同期 | sqflite / connectivity_plus / sync_queue |
 | CI/CD | GitHub Actions |
 | バージョン管理 | FVM |
-| テスト | Widget Test |
+| テスト | Widget Test / Unit Test（mockito, sqflite_common_ffi） |
 
 ## 開発背景
 転職活動のポートフォリオとして、Flutter での設計力・実装力・インフラ構築力を証明する目的で開発しました。
@@ -99,13 +105,16 @@ fvm dart run build_runner watch --delete-conflicting-outputs
 
 ## テスト実行
 ```
-fvm flutter test test/widget_test.dart
+fvm flutter test
 ```
 
 ## 要件定義書
 コーディングに関するルールや設計方針は以下を参照してください。
 
-`/word_stock_2026/requirements.md`
+[docs/requirements.md](docs/requirements.md)
+
+なお、上記要件定義書には「オンライン必須・ローカルキャッシュ不採用」という記載がありますが、これは作成時点の古い記述です。
+現在はオフライン同期対応へ移行中のため、最新の方針は [docs/online_offline.md](docs/online_offline.md) を参照してください。
 
 <details>
 <summary>環境構築手順（クリックで展開）</summary>
