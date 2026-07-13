@@ -7,7 +7,7 @@
 <p align="center">
   <em>📱 アプリのスクリーンショット（ログイン・単語一覧・テスト・設定）</em>
   <br>
-  <img src="docs/readme_top_wordstock.png" alt="WordStock アプリ画面" width="800">
+  <img src="docs/images/readme_top_wordstock.png" alt="WordStock アプリ画面" width="800">
 </p>
 
 ## 設計思想
@@ -20,7 +20,7 @@ UseCase レイヤーを設けることで、ビジネスロジックの独立性
 ### アーキテクチャ
 
 <p align="center">
-  <img src="docs/architecture.png" alt="アーキテクチャ図" width="800">
+  <img src="docs/images/architecture.png" alt="アーキテクチャ図" width="800">
 </p>
 
 #### 各レイヤーの責務
