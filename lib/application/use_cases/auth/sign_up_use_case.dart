@@ -1,3 +1,5 @@
+import 'dart:developer' show log;
+
 import 'package:fpdart/fpdart.dart';
 import 'package:word_stock_2026/core/error/failure.dart';
 import 'package:word_stock_2026/domain/entities/app_user.dart';
@@ -16,9 +18,15 @@ class SignUpUseCase {
   }) async {
     final result = await _repository.signUpWithEmail(
         email: email, password: password);
-    result.fold(
-      (_) {},
-      (_) => _syncService.syncRemoteToLocalOnLogin().ignore(),
+    await result.fold(
+      (_) async {},
+      (_) async {
+        try {
+          await _syncService.syncRemoteToLocalOnLogin();
+        } catch (e, stack) {
+          log('syncRemoteToLocalOnLogin failed: $e\n$stack');
+        }
+      },
     );
     return result;
   }

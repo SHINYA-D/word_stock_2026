@@ -2,6 +2,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:word_stock_2026/core/error/failure.dart';
 import 'package:word_stock_2026/presentation/auth/auth_state.dart';
 import 'package:word_stock_2026/core/di/auth_providers.dart';
+import 'package:word_stock_2026/core/di/sync_status_providers.dart';
 
 part 'login_view_model.g.dart';
 
@@ -15,9 +16,11 @@ class LoginViewModel extends _$LoginViewModel {
     required String password,
   }) async {
     state = state.copyWith(isLoading: true, isSuccess: false, errorMessage: null);
+    ref.read(authSyncInProgressProvider.notifier).state = true;
     final result = await ref
         .read(signInWithEmailUseCaseProvider)
         .call(email: email, password: password);
+    ref.read(authSyncInProgressProvider.notifier).state = false;
     result.fold(
       (failure) => state = state.copyWith(
         isLoading: false,
@@ -34,7 +37,9 @@ class LoginViewModel extends _$LoginViewModel {
 
   Future<void> signInWithGoogle() async {
     state = state.copyWith(isLoading: true, isSuccess: false, errorMessage: null);
+    ref.read(authSyncInProgressProvider.notifier).state = true;
     final result = await ref.read(signInWithGoogleUseCaseProvider).call();
+    ref.read(authSyncInProgressProvider.notifier).state = false;
     result.fold(
       (failure) => state = state.copyWith(
         isLoading: false,

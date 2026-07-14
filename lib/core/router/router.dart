@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:word_stock_2026/core/di/auth_providers.dart';
+import 'package:word_stock_2026/core/di/sync_status_providers.dart';
 import 'package:word_stock_2026/domain/entities/word.dart';
 import 'package:word_stock_2026/presentation/auth/login/login_page.dart';
 import 'package:word_stock_2026/presentation/auth/password_reset/password_reset_page.dart';
@@ -31,18 +32,21 @@ GoRouter router(Ref ref) {
       final authState = ref.read(authStateProvider);
       if (authState.isLoading) return null;
       final isLoggedIn = authState.valueOrNull != null;
+      final isSyncing = ref.read(authSyncInProgressProvider);
       final loc = state.matchedLocation;
       final isAuthRoute = loc == '/login' || loc == '/sign-up' || loc == '/password-reset';
 
       if (!isLoggedIn && !isAuthRoute && loc != '/') return '/login';
-      if (isLoggedIn && isAuthRoute) return '/home';
+      // ログイン直後の初回同期が終わるまではホームに遷移させない
+      if (isLoggedIn && isAuthRoute && !isSyncing) return '/home';
       return null;
     },
     routes: $appRoutes,
   );
 
-  // 認証状態が変わったら redirect を再評価させる
+  // 認証状態・同期状態が変わったら redirect を再評価させる
   ref.listen(authStateProvider, (_, __) => goRouter.refresh());
+  ref.listen(authSyncInProgressProvider, (_, __) => goRouter.refresh());
 
   return goRouter;
 }
