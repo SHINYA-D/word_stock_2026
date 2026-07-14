@@ -18,6 +18,7 @@ mixin _$Folder {
   String get name;
   String? get parentFolderId;
   DateTime get createdAt;
+  DateTime get updatedAt;
 
   /// Create a copy of Folder
   /// with the given fields replaced by the non-null parameter values.
@@ -39,17 +40,19 @@ mixin _$Folder {
             (identical(other.parentFolderId, parentFolderId) ||
                 other.parentFolderId == parentFolderId) &&
             (identical(other.createdAt, createdAt) ||
-                other.createdAt == createdAt));
+                other.createdAt == createdAt) &&
+            (identical(other.updatedAt, updatedAt) ||
+                other.updatedAt == updatedAt));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   int get hashCode =>
-      Object.hash(runtimeType, id, name, parentFolderId, createdAt);
+      Object.hash(runtimeType, id, name, parentFolderId, createdAt, updatedAt);
 
   @override
   String toString() {
-    return 'Folder(id: $id, name: $name, parentFolderId: $parentFolderId, createdAt: $createdAt)';
+    return 'Folder(id: $id, name: $name, parentFolderId: $parentFolderId, createdAt: $createdAt, updatedAt: $updatedAt)';
   }
 }
 
@@ -59,7 +62,11 @@ abstract mixin class $FolderCopyWith<$Res> {
       _$FolderCopyWithImpl;
   @useResult
   $Res call(
-      {String id, String name, String? parentFolderId, DateTime createdAt});
+      {String id,
+      String name,
+      String? parentFolderId,
+      DateTime createdAt,
+      DateTime updatedAt});
 }
 
 /// @nodoc
@@ -78,6 +85,7 @@ class _$FolderCopyWithImpl<$Res> implements $FolderCopyWith<$Res> {
     Object? name = null,
     Object? parentFolderId = freezed,
     Object? createdAt = null,
+    Object? updatedAt = null,
   }) {
     return _then(_self.copyWith(
       id: null == id
@@ -95,6 +103,10 @@ class _$FolderCopyWithImpl<$Res> implements $FolderCopyWith<$Res> {
       createdAt: null == createdAt
           ? _self.createdAt
           : createdAt // ignore: cast_nullable_to_non_nullable
+              as DateTime,
+      updatedAt: null == updatedAt
+          ? _self.updatedAt
+          : updatedAt // ignore: cast_nullable_to_non_nullable
               as DateTime,
     ));
   }
@@ -193,16 +205,16 @@ extension FolderPatterns on Folder {
 
   @optionalTypeArgs
   TResult maybeWhen<TResult extends Object?>(
-    TResult Function(
-            String id, String name, String? parentFolderId, DateTime createdAt)?
+    TResult Function(String id, String name, String? parentFolderId,
+            DateTime createdAt, DateTime updatedAt)?
         $default, {
     required TResult orElse(),
   }) {
     final _that = this;
     switch (_that) {
       case _Folder() when $default != null:
-        return $default(
-            _that.id, _that.name, _that.parentFolderId, _that.createdAt);
+        return $default(_that.id, _that.name, _that.parentFolderId,
+            _that.createdAt, _that.updatedAt);
       case _:
         return orElse();
     }
@@ -223,15 +235,15 @@ extension FolderPatterns on Folder {
 
   @optionalTypeArgs
   TResult when<TResult extends Object?>(
-    TResult Function(
-            String id, String name, String? parentFolderId, DateTime createdAt)
+    TResult Function(String id, String name, String? parentFolderId,
+            DateTime createdAt, DateTime updatedAt)
         $default,
   ) {
     final _that = this;
     switch (_that) {
       case _Folder():
-        return $default(
-            _that.id, _that.name, _that.parentFolderId, _that.createdAt);
+        return $default(_that.id, _that.name, _that.parentFolderId,
+            _that.createdAt, _that.updatedAt);
       case _:
         throw StateError('Unexpected subclass');
     }
@@ -251,15 +263,15 @@ extension FolderPatterns on Folder {
 
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>(
-    TResult? Function(
-            String id, String name, String? parentFolderId, DateTime createdAt)?
+    TResult? Function(String id, String name, String? parentFolderId,
+            DateTime createdAt, DateTime updatedAt)?
         $default,
   ) {
     final _that = this;
     switch (_that) {
       case _Folder() when $default != null:
-        return $default(
-            _that.id, _that.name, _that.parentFolderId, _that.createdAt);
+        return $default(_that.id, _that.name, _that.parentFolderId,
+            _that.createdAt, _that.updatedAt);
       case _:
         return null;
     }
@@ -273,7 +285,8 @@ class _Folder implements Folder {
       {required this.id,
       required this.name,
       this.parentFolderId,
-      required this.createdAt});
+      required this.createdAt,
+      required this.updatedAt});
   factory _Folder.fromJson(Map<String, dynamic> json) => _$FolderFromJson(json);
 
   @override
@@ -284,6 +297,8 @@ class _Folder implements Folder {
   final String? parentFolderId;
   @override
   final DateTime createdAt;
+  @override
+  final DateTime updatedAt;
 
   /// Create a copy of Folder
   /// with the given fields replaced by the non-null parameter values.
@@ -310,17 +325,19 @@ class _Folder implements Folder {
             (identical(other.parentFolderId, parentFolderId) ||
                 other.parentFolderId == parentFolderId) &&
             (identical(other.createdAt, createdAt) ||
-                other.createdAt == createdAt));
+                other.createdAt == createdAt) &&
+            (identical(other.updatedAt, updatedAt) ||
+                other.updatedAt == updatedAt));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   int get hashCode =>
-      Object.hash(runtimeType, id, name, parentFolderId, createdAt);
+      Object.hash(runtimeType, id, name, parentFolderId, createdAt, updatedAt);
 
   @override
   String toString() {
-    return 'Folder(id: $id, name: $name, parentFolderId: $parentFolderId, createdAt: $createdAt)';
+    return 'Folder(id: $id, name: $name, parentFolderId: $parentFolderId, createdAt: $createdAt, updatedAt: $updatedAt)';
   }
 }
 
@@ -331,7 +348,11 @@ abstract mixin class _$FolderCopyWith<$Res> implements $FolderCopyWith<$Res> {
   @override
   @useResult
   $Res call(
-      {String id, String name, String? parentFolderId, DateTime createdAt});
+      {String id,
+      String name,
+      String? parentFolderId,
+      DateTime createdAt,
+      DateTime updatedAt});
 }
 
 /// @nodoc
@@ -350,6 +371,7 @@ class __$FolderCopyWithImpl<$Res> implements _$FolderCopyWith<$Res> {
     Object? name = null,
     Object? parentFolderId = freezed,
     Object? createdAt = null,
+    Object? updatedAt = null,
   }) {
     return _then(_Folder(
       id: null == id
@@ -367,6 +389,10 @@ class __$FolderCopyWithImpl<$Res> implements _$FolderCopyWith<$Res> {
       createdAt: null == createdAt
           ? _self.createdAt
           : createdAt // ignore: cast_nullable_to_non_nullable
+              as DateTime,
+      updatedAt: null == updatedAt
+          ? _self.updatedAt
+          : updatedAt // ignore: cast_nullable_to_non_nullable
               as DateTime,
     ));
   }

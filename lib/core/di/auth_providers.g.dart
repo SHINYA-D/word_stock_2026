@@ -39,7 +39,7 @@ final currentUserProvider = Provider<AppUser?>.internal(
 // ignore: unused_element
 typedef CurrentUserRef = ProviderRef<AppUser?>;
 String _$signInWithEmailUseCaseHash() =>
-    r'b29a127940847ee18b2996dd5369099c30f84556';
+    r'26774cf6742089308d6f16249f05a1a036021d94';
 
 /// See also [signInWithEmailUseCase].
 @ProviderFor(signInWithEmailUseCase)
@@ -57,7 +57,7 @@ final signInWithEmailUseCaseProvider =
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
 typedef SignInWithEmailUseCaseRef = ProviderRef<SignInWithEmailUseCase>;
-String _$signUpUseCaseHash() => r'252a923348273f4b6c15d15db40946366359a16a';
+String _$signUpUseCaseHash() => r'858c2c71e2dc92d52c3dd3a23f89b6fd69097992';
 
 /// See also [signUpUseCase].
 @ProviderFor(signUpUseCase)
@@ -75,7 +75,7 @@ final signUpUseCaseProvider = Provider<SignUpUseCase>.internal(
 // ignore: unused_element
 typedef SignUpUseCaseRef = ProviderRef<SignUpUseCase>;
 String _$signInWithGoogleUseCaseHash() =>
-    r'990a66810ccae1d1ded7bded76694e63b0e659c9';
+    r'af1df00d00b97977e826cd5bdd0b835a3c2990af';
 
 /// See also [signInWithGoogleUseCase].
 @ProviderFor(signInWithGoogleUseCase)

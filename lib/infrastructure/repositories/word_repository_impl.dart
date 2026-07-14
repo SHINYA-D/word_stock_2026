@@ -1,14 +1,36 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:fpdart/fpdart.dart';
+import 'package:uuid/uuid.dart';
 import 'package:word_stock_2026/core/error/failure.dart';
 import 'package:word_stock_2026/domain/entities/word.dart';
 import 'package:word_stock_2026/domain/repositories/word_repository.dart';
 import 'package:word_stock_2026/infrastructure/data_sources/firestore_data_source.dart';
+import 'package:word_stock_2026/infrastructure/data_sources/local/database_helper.dart';
+import 'package:word_stock_2026/infrastructure/data_sources/local/sync_queue_data_source.dart';
+import 'package:word_stock_2026/infrastructure/data_sources/local/tables/word_table.dart';
+import 'package:word_stock_2026/infrastructure/data_sources/local/word_local_data_source.dart';
+import 'package:word_stock_2026/infrastructure/data_sources/network/connectivity_monitor.dart';
 
 class WordRepositoryImpl implements WordRepository {
-  WordRepositoryImpl(this._dataSource);
+  WordRepositoryImpl({
+    required WordLocalDataSource localDataSource,
+    required FirestoreDataSource remoteDataSource,
+    required SyncQueueDataSource syncQueueDataSource,
+    required DatabaseHelper dbHelper,
+    required ConnectivityMonitor connectivityMonitor,
+  })  : _local = localDataSource,
+        _remote = remoteDataSource,
+        _syncQueue = syncQueueDataSource,
+        _dbHelper = dbHelper,
+        _connectivity = connectivityMonitor;
 
-  final FirestoreDataSource _dataSource;
+  final WordLocalDataSource _local;
+  final FirestoreDataSource _remote;
+  final SyncQueueDataSource _syncQueue;
+  final DatabaseHelper _dbHelper;
+  final ConnectivityMonitor _connectivity;
+
+  static const _uuid = Uuid();
 
   @override
   Future<Either<Failure, List<Word>>> getWords({
@@ -16,11 +38,8 @@ class WordRepositoryImpl implements WordRepository {
     required String folderId,
   }) async {
     try {
-      final data =
-          await _dataSource.getWords(userId: userId, folderId: folderId);
-      return Right(data.map(_fromMap).toList());
-    } on FirebaseException catch (e) {
-      return Left(_mapException(e));
+      final words = await _local.findByFolderId(folderId, userId: userId);
+      return Right(words);
     } catch (e) {
       return Left(Failure.unknown(e.toString()));
     }
@@ -34,13 +53,52 @@ class WordRepositoryImpl implements WordRepository {
     required String back,
   }) async {
     try {
-      final data = await _dataSource.createWord(
-        userId: userId,
-        folderId: folderId,
+      final now = DateTime.now();
+      final word = Word(
+        id: _uuid.v4(),
         front: front,
         back: back,
+        createdAt: now,
+        updatedAt: now,
       );
-      return Right(_fromMap(data));
+      final isOnline = await _connectivity.isOnline();
+
+      if (isOnline) {
+        await _local.insert(word,
+            userId: userId, folderId: folderId, syncStatus: 'synced');
+        await _remote.writeWord(word, userId, folderId);
+      } else {
+        final db = await _dbHelper.database;
+        await db.transaction((txn) async {
+          await txn.insert(
+            WordTable.tableName,
+            {
+              'id': word.id,
+              'front': word.front,
+              'back': word.back,
+              'folderId': folderId,
+              'userId': userId,
+              'createdAt': word.createdAt.toIso8601String(),
+              'updatedAt': word.updatedAt.toIso8601String(),
+              'syncStatus': 'pending',
+            },
+          );
+          await _syncQueue.enqueueInTransaction(
+            txn,
+            operation: 'create',
+            tableName: WordTable.tableName,
+            recordId: word.id,
+            parentId: folderId,
+            payload: {
+              'front': word.front,
+              'back': word.back,
+              'createdAt': word.createdAt.toIso8601String(),
+              'updatedAt': word.updatedAt.toIso8601String(),
+            },
+          );
+        });
+      }
+      return Right(word);
     } on FirebaseException catch (e) {
       return Left(_mapException(e));
     } catch (e) {
@@ -57,14 +115,51 @@ class WordRepositoryImpl implements WordRepository {
     required String back,
   }) async {
     try {
-      final data = await _dataSource.updateWord(
-        userId: userId,
-        folderId: folderId,
-        wordId: wordId,
+      final existing = await _local.findById(wordId);
+      final now = DateTime.now();
+      final word = Word(
+        id: wordId,
         front: front,
         back: back,
+        createdAt: existing?.createdAt ?? now,
+        updatedAt: now,
       );
-      return Right(_fromMap(data));
+      final isOnline = await _connectivity.isOnline();
+
+      if (isOnline) {
+        await _local.update(word,
+            userId: userId, folderId: folderId, syncStatus: 'synced');
+        await _remote.writeWord(word, userId, folderId);
+      } else {
+        final db = await _dbHelper.database;
+        await db.transaction((txn) async {
+          await txn.update(
+            WordTable.tableName,
+            {
+              'front': word.front,
+              'back': word.back,
+              'updatedAt': word.updatedAt.toIso8601String(),
+              'syncStatus': 'pending',
+            },
+            where: 'id = ?',
+            whereArgs: [wordId],
+          );
+          await _syncQueue.enqueueInTransaction(
+            txn,
+            operation: 'update',
+            tableName: WordTable.tableName,
+            recordId: word.id,
+            parentId: folderId,
+            payload: {
+              'front': word.front,
+              'back': word.back,
+              'createdAt': word.createdAt.toIso8601String(),
+              'updatedAt': word.updatedAt.toIso8601String(),
+            },
+          );
+        });
+      }
+      return Right(word);
     } on FirebaseException catch (e) {
       return Left(_mapException(e));
     } catch (e) {
@@ -79,27 +174,34 @@ class WordRepositoryImpl implements WordRepository {
     required String wordId,
   }) async {
     try {
-      await _dataSource.deleteWord(
-        userId: userId,
-        folderId: folderId,
-        wordId: wordId,
-      );
+      final isOnline = await _connectivity.isOnline();
+
+      if (isOnline) {
+        await _local.delete(wordId);
+        await _remote.deleteRemoteWord(userId, folderId, wordId);
+      } else {
+        final db = await _dbHelper.database;
+        await db.transaction((txn) async {
+          await txn.delete(
+            WordTable.tableName,
+            where: 'id = ?',
+            whereArgs: [wordId],
+          );
+          await _syncQueue.enqueueInTransaction(
+            txn,
+            operation: 'delete',
+            tableName: WordTable.tableName,
+            recordId: wordId,
+            parentId: folderId,
+          );
+        });
+      }
       return const Right(unit);
     } on FirebaseException catch (e) {
       return Left(_mapException(e));
     } catch (e) {
       return Left(Failure.unknown(e.toString()));
     }
-  }
-
-  Word _fromMap(Map<String, dynamic> map) {
-    final createdAt = map['createdAt'];
-    return Word(
-      id: map['id'] as String,
-      front: map['front'] as String,
-      back: map['back'] as String,
-      createdAt: createdAt is Timestamp ? createdAt.toDate() : DateTime.now(),
-    );
   }
 
   Failure _mapException(FirebaseException e) {

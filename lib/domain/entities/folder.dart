@@ -10,6 +10,7 @@ abstract class Folder with _$Folder {
     required String name,
     String? parentFolderId,
     required DateTime createdAt,
+    required DateTime updatedAt,
   }) = _Folder;
 
   factory Folder.fromJson(Map<String, dynamic> json) => _$FolderFromJson(json);

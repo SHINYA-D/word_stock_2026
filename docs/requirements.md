@@ -34,12 +34,18 @@
 | Firebase | `cloud_firestore` | 5.6.6 | データ保存 |
 | Firebase | `firebase_storage` | 12.4.5 | ストレージ（将来用） |
 | 認証 | `google_sign_in` | 6.2.2 | Google ログイン |
+| オフライン同期 | `sqflite` | 2.3.0 | ローカルDB（SQLite） |
+| オフライン同期 | `path` | 1.8.0 | SQLiteファイルパス解決 |
+| オフライン同期 | `connectivity_plus` | 5.0.0 | ネットワーク状態監視 |
+| オフライン同期 | `uuid` | 4.3.3 | ローカル生成IDの発行 |
 | コード生成 | `build_runner` | 2.4.14 | コード自動生成（Freezed / Riverpod） |
 | コード生成 | `freezed` | 3.0.0 | Freezed コード生成 |
 | コード生成 | `riverpod_generator` | 2.6.5 | Riverpod コード生成 |
 | コード生成 | `json_serializable` | 6.9.4 | JSON コード生成 |
+| コード生成 | `go_router_builder` | 2.7.0〜2.9.0未満 | go_router 型安全ルート生成 |
 | フォーマット | `flutter_lints` | 6.0.0 | コード品質・フォーマットチェック |
 | テスト | `mockito` | 5.4.5 | モック生成ライブラリ |
+| テスト | `sqflite_common_ffi` | 2.4.0+3 | テスト環境でのSQLite実行（FFI） |
 
 ### バックエンド / クラウド（Firebase）
 
@@ -72,7 +78,7 @@ infrastructure/ # インフラ層：Firebase実装・外部サービス
 | presentation | 画面表示・ユーザー操作の受付 | Page / Widget / ViewModel (Notifier) / State (Freezed) |
 | application | ユースケースの実行・ドメインの調整 | UseCase クラス |
 | domain | ビジネスロジック・ルールの定義 | Entity / Repository（interface） |
-| infrastructure | 外部サービスとの通信・データ変換 | RepositoryImpl / DataSource |
+| infrastructure | 外部サービスとの通信・データ変換 | RepositoryImpl / DataSource（Firebase・SQLite・同期処理） |
 
 ### ディレクトリ構成（現状）
 
@@ -90,16 +96,21 @@ lib/
 │   │   ├── word_providers.dart       # 単語 UseCase Provider
 │   │   ├── folder_providers.dart     # フォルダ UseCase Provider
 │   │   ├── settings_providers.dart   # 設定 UseCase Provider
-│   │   └── test_result_providers.dart# 成績 UseCase Provider
+│   │   ├── test_result_providers.dart# 成績 UseCase Provider
+│   │   ├── local_data_source_providers.dart # SQLite LocalDataSource Provider
+│   │   └── sync_providers.dart       # 同期関連（SyncService 等）Provider
 │   ├── error/
 │   │   └── failure.dart              # Failure ユニオン型定義
+│   ├── firebase/
+│   │   └── firestore_path.dart       # Firestore パス生成ユーティリティ
 │   ├── router/
 │   │   └── router.dart               # go_router 設定・認証リダイレクト
 │   ├── theme/
 │   │   └── app_theme.dart            # Material 3 テーマ・カラーテーマ定義
-│   └── widgets/
-│       ├── error_screen.dart         # エラー全画面ウィジェット
-│       └── network_error_dialog.dart # 通信エラーダイアログウィジェット
+│   ├── widgets/
+│   │   ├── error_screen.dart         # エラー全画面ウィジェット
+│   │   └── network_error_dialog.dart # 通信エラーダイアログウィジェット
+│   └── app_lifecycle_observer.dart   # resumed検知によるオフライン差分同期トリガー
 │
 ├── presentation/                     # UI層（MVVM）
 │   ├── shell/
@@ -179,10 +190,29 @@ lib/
 │       └── settings_repository.dart
 │
 └── infrastructure/                   # インフラ層
-    ├── data_sources/                 # Firebase との通信処理
-    │   ├── firebase_auth_data_source.dart
-    │   └── firestore_data_source.dart
-    └── repositories/                 # Repository の Firebase 実装
+    ├── data_sources/
+    │   ├── firebase_auth_data_source.dart # Firebase Auth との通信処理
+    │   ├── firestore_data_source.dart     # Firestore との通信処理
+    │   ├── local/                         # SQLite ローカルDB（オフライン同期用）
+    │   │   ├── database_helper.dart       # DB接続・テーブル初期化
+    │   │   ├── tables/                    # テーブル定義（CREATE文）
+    │   │   │   ├── folder_table.dart
+    │   │   │   ├── word_table.dart
+    │   │   │   ├── test_result_table.dart
+    │   │   │   ├── settings_table.dart
+    │   │   │   ├── sync_queue_table.dart
+    │   │   │   └── sync_meta_table.dart
+    │   │   ├── folder_local_data_source.dart
+    │   │   ├── word_local_data_source.dart
+    │   │   ├── test_result_local_data_source.dart
+    │   │   ├── settings_local_data_source.dart
+    │   │   └── sync_queue_data_source.dart # sync_queue へのキュー登録・取得
+    │   └── network/
+    │       └── connectivity_monitor.dart  # connectivity_plus によるオンライン/オフライン検知
+    ├── sync/                              # オンライン復帰時・ログイン時の同期処理
+    │   ├── sync_service.dart              # ローカル⇔リモート同期本体（競合解決含む）
+    │   └── auto_sync_service.dart         # オンライン復帰検知時の自動同期起動
+    └── repositories/                 # Repository の実装（Firebase + SQLite）
         ├── auth_repository_impl.dart
         ├── folder_repository_impl.dart
         ├── word_repository_impl.dart
@@ -195,6 +225,8 @@ lib/
             ├── mock_settings_repository.dart
             └── mock_test_result_repository.dart
 ```
+
+> オフライン同期の詳細な設計（SQLiteテーブル定義・sync_queueによるキューイング・競合解決方式など）は `docs/online_offline.md` を参照。
 
 ### 依存関係ルール
 
@@ -209,6 +241,7 @@ lib/
 | テスト種別 | 対象 | 使用ツール |
 |------------|------|------------|
 | ユニットテスト | UseCase / Entity / Repository | `flutter_test` + `mockito` |
+| ユニットテスト | LocalDataSource / SyncService（オフライン同期） | `flutter_test` + `sqflite_common_ffi`（インメモリSQLite） |
 | ウィジェットテスト | 各画面・ウィジェット | `flutter_test` |
 | 統合テスト | 画面遷移・E2Eフロー | `integration_test` |
 
@@ -417,12 +450,12 @@ abstract class AuthState with _$AuthState {
 
 ### オフライン時の挙動
 
-本アプリは**オンライン必須**とする。ローカルキャッシュによるオフライン対応は行わない。
+> **注意:** 本セクションはオフライン同期対応（SQLite + `sync_queue`）への移行に伴い更新されている。旧バージョンでは「オンライン必須・ローカルキャッシュ不採用」としていたが、現在はログイン・新規登録・パスワード変更を除くコア機能（フォルダ・単語・成績・設定の作成/更新/削除、および閲覧）はオフラインでも継続利用できる。詳細な同期アーキテクチャ・フェーズ計画は `docs/online_offline.md` を参照。
 
-- オフライン（通信不可）を検知した場合 → `NetworkErrorDialog` を表示
-- ユーザーが OK を押下 → `FirebaseAuth.signOut()` で強制ログアウト
-- `go_router` でログイン画面へリダイレクト
-- `shared_preferences` / `hive` 等のローカル保存は**採用しない**（設定値は Firebase に保存）
+- **認証系操作（ログイン・新規登録・パスワードリセット）は Firebase Auth 依存のためオフライン対応の対象外。** これらの操作時に通信不可を検知した場合 → `NetworkErrorDialog` を表示 → OK押下で `FirebaseAuth.signOut()` により強制ログアウト → `go_router` でログイン画面へリダイレクト
+- **ログイン後のデータ操作（フォルダ・単語・成績・設定）はオフラインでも継続利用可能。** 読み取りは常にSQLiteから行い、書き込みはオフライン時にSQLiteへ保存すると同時に `sync_queue` テーブルへ同一トランザクションで登録する
+- オンライン復帰時（`connectivity_plus` で検知）に `sync_queue` の内容を古い順にFirestoreへ自動同期する
+- ログイン成功時・アプリ再開（resumed）時にはFirestoreからSQLiteへの差分同期も行われる（resumedは前回同期から5分以上経過時のみ）
 
 ---
 
@@ -448,6 +481,7 @@ abstract class Word with _$Word {
     required String front,
     required String back,
     required DateTime createdAt,
+    required DateTime updatedAt, // オフライン同期の競合解決（Last-Write-Wins）に使用
   }) = _Word;
 }
 ```
@@ -494,6 +528,7 @@ abstract class Folder with _$Folder {
     required String name,
     String? parentFolderId,     // null = ルートフォルダ
     required DateTime createdAt,
+    required DateTime updatedAt, // オフライン同期の競合解決（Last-Write-Wins）に使用
   }) = _Folder;
 
   factory Folder.fromJson(Map<String, dynamic> json) => _$FolderFromJson(json);
@@ -566,6 +601,7 @@ abstract class TestResult with _$TestResult {
     required int totalCount,
     required int correctCount,
     required DateTime date,
+    required DateTime updatedAt, // オフライン同期の競合解決（Last-Write-Wins）に使用
   }) = _TestResult;
 
   const TestResult._();
@@ -589,6 +625,7 @@ abstract class UserSettings with _$UserSettings {
   const factory UserSettings({
     @Default('indigo') String colorTheme,
     @Default(false) bool darkMode,
+    DateTime? updatedAt, // オフライン同期の競合解決（Last-Write-Wins）に使用
   }) = _UserSettings;
 }
 ```
@@ -646,6 +683,7 @@ abstract class UserSettings with _$UserSettings {
 ## 8. Firestore データ構造
 
 フォルダのネスト対応のため、`parentFolderId` フィールドで親子関係を管理する。
+各ドキュメントには、オフライン同期の競合解決（Last-Write-Wins）に使用する `updatedAt` フィールドを持たせる。
 
 ```
 users/
@@ -655,24 +693,30 @@ users/
         name: string
         parentFolderId: string | null  // null = ルートフォルダ
         createdAt: timestamp
+        updatedAt: timestamp           // 競合解決用
         words/
           {wordId}/
             front: string              // 単語（表面）
             back: string               // 意味（裏面）
             createdAt: timestamp
-    testResults/
+            updatedAt: timestamp       // 競合解決用
+    test_results/
       {resultId}/
         folderId: string               // 紐づくフォルダID
         totalCount: number
         correctCount: number
         date: timestamp
+        updatedAt: timestamp           // 競合解決用
     settings/
-      {document}/
+      config/
         colorTheme: string             // カラーテーマ（デフォルト: 'indigo'）
         darkMode: boolean              // ダークモード（デフォルト: false）
+        updatedAt: timestamp           // 競合解決用
 ```
 
 > **カスケード削除について:** Firestoreはカスケード削除を自動では行わない。フォルダ削除時はアプリ側（infrastructure層 `firestore_data_source.dart`）で配下の words / サブフォルダ / testResults を再帰的に削除する処理を実装すること。
+
+> **ローカルDB（SQLite）とのミラーリングについて:** 本アプリはオフライン同期対応のため、上記Firestore構造とほぼ同一のスキーマを持つSQLiteテーブル（`folders` / `words` / `test_results` / `settings`）をローカルに保持し、UI層は常にSQLiteを読み取り元とする。加えて未同期の変更操作を記録する `sync_queue` テーブル、最終同期時刻を記録する `sync_meta` テーブルを持つ。SQLite側のテーブル定義・カラム（`syncStatus` 等）の詳細は `docs/online_offline.md` を参照。
 
 ---
 
@@ -694,7 +738,7 @@ users/
 | 項目 | 内容 |
 |------|------|
 | 対応OS | iOS 15以上 / Android 10以上 |
-| オフライン対応 | **オンライン必須** — オフライン検知時は通信エラーダイアログを表示し強制ログアウト → ログイン画面へリダイレクト |
+| オフライン対応 | **オフライン同期対応（移行済み）** — ログイン後のコア機能（フォルダ・単語・成績・設定）はSQLite + `sync_queue` によりオフラインでも継続利用可能。オンライン復帰時に自動同期。ログイン・新規登録・パスワード変更はFirebase Auth依存のためオフライン対応対象外（通信不可検知時は通信エラーダイアログを表示し強制ログアウト → ログイン画面へリダイレクト）。詳細は `docs/online_offline.md` を参照 |
 | セキュリティ | Firebase Security Rules でユーザーデータを保護（自分のデータのみ読み書き可） |
 | 多言語 | 単語の入力言語は制限なし（UI言語は日本語を基本とする） |
 | 開発補助 | `kUseMocks = false` フラグで Firebase 不要のモック実装に切り替え可能 |
@@ -725,15 +769,18 @@ service cloud.firestore {
 ```yaml
 name: word_stock_2026
 description: テスト機能付き単語帳アプリ
-publish_to: none
+publish_to: 'none'
+
 version: 1.0.0+1
 
 environment:
-  sdk: ">=3.3.3 <4.0.0"
+  sdk: '>=3.3.3 <4.0.0'
 
 dependencies:
   flutter:
     sdk: flutter
+
+  cupertino_icons: ^1.0.8
 
   # 画面遷移
   go_router: ^14.6.3
@@ -749,15 +796,27 @@ dependencies:
   # エラーハンドリング
   fpdart: ^1.1.0
 
-  # 国際化
-  intl: ^0.19.0
-
   # Firebase
   firebase_core: ^3.13.0
   firebase_auth: ^5.5.2
   cloud_firestore: ^5.6.6
   firebase_storage: ^12.4.5
   google_sign_in: ^6.2.2
+
+  # 日付フォーマット
+  intl: ^0.19.0
+
+  # ローカルDB・ネットワーク監視（オフライン同期）
+  sqflite: ^2.3.0
+  path: ^1.8.0
+  connectivity_plus: ^5.0.0
+  uuid: ^4.3.3
+
+  # スプラッシュ画面
+  flutter_native_splash: ^2.4.3
+
+  # アプリアイコン生成
+  flutter_launcher_icons: ^0.14.3
 
 dev_dependencies:
   flutter_test:
@@ -768,12 +827,16 @@ dev_dependencies:
   freezed: ^3.0.0
   riverpod_generator: ^2.6.5
   json_serializable: ^6.9.4
+  go_router_builder: ">=2.7.0 <2.9.0"
 
   # フォーマット
   flutter_lints: ^6.0.0
 
   # テスト
   mockito: ^5.4.5
+  sqflite_common_ffi: ^2.4.0+3
 ```
+
+> 上記は `pubspec.yaml` の `dependencies` / `dev_dependencies` を反映したもの。`flutter:` セクション（アセット指定）や `flutter_native_splash:` / `flutter_launcher_icons:` の設定値は `pubspec.yaml` 本体を参照。
 
 ---

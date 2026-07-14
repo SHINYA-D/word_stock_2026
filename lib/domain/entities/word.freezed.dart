@@ -18,6 +18,7 @@ mixin _$Word {
   String get front;
   String get back;
   DateTime get createdAt;
+  DateTime get updatedAt;
 
   /// Create a copy of Word
   /// with the given fields replaced by the non-null parameter values.
@@ -35,15 +36,18 @@ mixin _$Word {
             (identical(other.front, front) || other.front == front) &&
             (identical(other.back, back) || other.back == back) &&
             (identical(other.createdAt, createdAt) ||
-                other.createdAt == createdAt));
+                other.createdAt == createdAt) &&
+            (identical(other.updatedAt, updatedAt) ||
+                other.updatedAt == updatedAt));
   }
 
   @override
-  int get hashCode => Object.hash(runtimeType, id, front, back, createdAt);
+  int get hashCode =>
+      Object.hash(runtimeType, id, front, back, createdAt, updatedAt);
 
   @override
   String toString() {
-    return 'Word(id: $id, front: $front, back: $back, createdAt: $createdAt)';
+    return 'Word(id: $id, front: $front, back: $back, createdAt: $createdAt, updatedAt: $updatedAt)';
   }
 }
 
@@ -52,7 +56,12 @@ abstract mixin class $WordCopyWith<$Res> {
   factory $WordCopyWith(Word value, $Res Function(Word) _then) =
       _$WordCopyWithImpl;
   @useResult
-  $Res call({String id, String front, String back, DateTime createdAt});
+  $Res call(
+      {String id,
+      String front,
+      String back,
+      DateTime createdAt,
+      DateTime updatedAt});
 }
 
 /// @nodoc
@@ -71,6 +80,7 @@ class _$WordCopyWithImpl<$Res> implements $WordCopyWith<$Res> {
     Object? front = null,
     Object? back = null,
     Object? createdAt = null,
+    Object? updatedAt = null,
   }) {
     return _then(_self.copyWith(
       id: null == id
@@ -88,6 +98,10 @@ class _$WordCopyWithImpl<$Res> implements $WordCopyWith<$Res> {
       createdAt: null == createdAt
           ? _self.createdAt
           : createdAt // ignore: cast_nullable_to_non_nullable
+              as DateTime,
+      updatedAt: null == updatedAt
+          ? _self.updatedAt
+          : updatedAt // ignore: cast_nullable_to_non_nullable
               as DateTime,
     ));
   }
@@ -186,14 +200,16 @@ extension WordPatterns on Word {
 
   @optionalTypeArgs
   TResult maybeWhen<TResult extends Object?>(
-    TResult Function(String id, String front, String back, DateTime createdAt)?
+    TResult Function(String id, String front, String back, DateTime createdAt,
+            DateTime updatedAt)?
         $default, {
     required TResult orElse(),
   }) {
     final _that = this;
     switch (_that) {
       case _Word() when $default != null:
-        return $default(_that.id, _that.front, _that.back, _that.createdAt);
+        return $default(_that.id, _that.front, _that.back, _that.createdAt,
+            _that.updatedAt);
       case _:
         return orElse();
     }
@@ -214,13 +230,15 @@ extension WordPatterns on Word {
 
   @optionalTypeArgs
   TResult when<TResult extends Object?>(
-    TResult Function(String id, String front, String back, DateTime createdAt)
+    TResult Function(String id, String front, String back, DateTime createdAt,
+            DateTime updatedAt)
         $default,
   ) {
     final _that = this;
     switch (_that) {
       case _Word():
-        return $default(_that.id, _that.front, _that.back, _that.createdAt);
+        return $default(_that.id, _that.front, _that.back, _that.createdAt,
+            _that.updatedAt);
       case _:
         throw StateError('Unexpected subclass');
     }
@@ -240,13 +258,15 @@ extension WordPatterns on Word {
 
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>(
-    TResult? Function(String id, String front, String back, DateTime createdAt)?
+    TResult? Function(String id, String front, String back, DateTime createdAt,
+            DateTime updatedAt)?
         $default,
   ) {
     final _that = this;
     switch (_that) {
       case _Word() when $default != null:
-        return $default(_that.id, _that.front, _that.back, _that.createdAt);
+        return $default(_that.id, _that.front, _that.back, _that.createdAt,
+            _that.updatedAt);
       case _:
         return null;
     }
@@ -260,7 +280,8 @@ class _Word implements Word {
       {required this.id,
       required this.front,
       required this.back,
-      required this.createdAt});
+      required this.createdAt,
+      required this.updatedAt});
 
   @override
   final String id;
@@ -270,6 +291,8 @@ class _Word implements Word {
   final String back;
   @override
   final DateTime createdAt;
+  @override
+  final DateTime updatedAt;
 
   /// Create a copy of Word
   /// with the given fields replaced by the non-null parameter values.
@@ -288,15 +311,18 @@ class _Word implements Word {
             (identical(other.front, front) || other.front == front) &&
             (identical(other.back, back) || other.back == back) &&
             (identical(other.createdAt, createdAt) ||
-                other.createdAt == createdAt));
+                other.createdAt == createdAt) &&
+            (identical(other.updatedAt, updatedAt) ||
+                other.updatedAt == updatedAt));
   }
 
   @override
-  int get hashCode => Object.hash(runtimeType, id, front, back, createdAt);
+  int get hashCode =>
+      Object.hash(runtimeType, id, front, back, createdAt, updatedAt);
 
   @override
   String toString() {
-    return 'Word(id: $id, front: $front, back: $back, createdAt: $createdAt)';
+    return 'Word(id: $id, front: $front, back: $back, createdAt: $createdAt, updatedAt: $updatedAt)';
   }
 }
 
@@ -306,7 +332,12 @@ abstract mixin class _$WordCopyWith<$Res> implements $WordCopyWith<$Res> {
       __$WordCopyWithImpl;
   @override
   @useResult
-  $Res call({String id, String front, String back, DateTime createdAt});
+  $Res call(
+      {String id,
+      String front,
+      String back,
+      DateTime createdAt,
+      DateTime updatedAt});
 }
 
 /// @nodoc
@@ -325,6 +356,7 @@ class __$WordCopyWithImpl<$Res> implements _$WordCopyWith<$Res> {
     Object? front = null,
     Object? back = null,
     Object? createdAt = null,
+    Object? updatedAt = null,
   }) {
     return _then(_Word(
       id: null == id
@@ -342,6 +374,10 @@ class __$WordCopyWithImpl<$Res> implements _$WordCopyWith<$Res> {
       createdAt: null == createdAt
           ? _self.createdAt
           : createdAt // ignore: cast_nullable_to_non_nullable
+              as DateTime,
+      updatedAt: null == updatedAt
+          ? _self.updatedAt
+          : updatedAt // ignore: cast_nullable_to_non_nullable
               as DateTime,
     ));
   }

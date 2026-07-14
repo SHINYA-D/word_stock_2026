@@ -9,5 +9,6 @@ abstract class Word with _$Word {
     required String front,
     required String back,
     required DateTime createdAt,
+    required DateTime updatedAt,
   }) = _Word;
 }

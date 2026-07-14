@@ -23,7 +23,7 @@ final authRepositoryProvider = Provider<AuthRepository>.internal(
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
 typedef AuthRepositoryRef = ProviderRef<AuthRepository>;
-String _$folderRepositoryHash() => r'a0fb8c15e04fbafc16c8a24598a390621fcb2ad3';
+String _$folderRepositoryHash() => r'ba4b911417b7ffe054db3a1e27e5ed05b577bbce';
 
 /// See also [folderRepository].
 @ProviderFor(folderRepository)
@@ -40,7 +40,7 @@ final folderRepositoryProvider = Provider<FolderRepository>.internal(
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
 typedef FolderRepositoryRef = ProviderRef<FolderRepository>;
-String _$wordRepositoryHash() => r'2b7124f25f5e61cf0eeb0246405db099f3fdf3df';
+String _$wordRepositoryHash() => r'5d6fdfd4fbf10b3a52605fffb60384791ebe8ac4';
 
 /// See also [wordRepository].
 @ProviderFor(wordRepository)
@@ -58,7 +58,7 @@ final wordRepositoryProvider = Provider<WordRepository>.internal(
 // ignore: unused_element
 typedef WordRepositoryRef = ProviderRef<WordRepository>;
 String _$testResultRepositoryHash() =>
-    r'41a86c2af4b0b1e155b7e52db17d5678beb8dc7f';
+    r'7f61de5028e2ac272d1b623ad777f8fd156f7c56';
 
 /// See also [testResultRepository].
 @ProviderFor(testResultRepository)
@@ -76,7 +76,7 @@ final testResultRepositoryProvider = Provider<TestResultRepository>.internal(
 // ignore: unused_element
 typedef TestResultRepositoryRef = ProviderRef<TestResultRepository>;
 String _$settingsRepositoryHash() =>
-    r'6695ce39feaee7bd1f01ede48673a376118ff267';
+    r'c11f3897527637880a5ddb6dac0e0d58cdedaa20';
 
 /// See also [settingsRepository].
 @ProviderFor(settingsRepository)

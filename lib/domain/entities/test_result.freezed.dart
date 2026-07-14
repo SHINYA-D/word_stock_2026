@@ -19,6 +19,7 @@ mixin _$TestResult {
   int get totalCount;
   int get correctCount;
   DateTime get date;
+  DateTime get updatedAt;
 
   /// Create a copy of TestResult
   /// with the given fields replaced by the non-null parameter values.
@@ -39,16 +40,18 @@ mixin _$TestResult {
                 other.totalCount == totalCount) &&
             (identical(other.correctCount, correctCount) ||
                 other.correctCount == correctCount) &&
-            (identical(other.date, date) || other.date == date));
+            (identical(other.date, date) || other.date == date) &&
+            (identical(other.updatedAt, updatedAt) ||
+                other.updatedAt == updatedAt));
   }
 
   @override
-  int get hashCode =>
-      Object.hash(runtimeType, id, folderId, totalCount, correctCount, date);
+  int get hashCode => Object.hash(
+      runtimeType, id, folderId, totalCount, correctCount, date, updatedAt);
 
   @override
   String toString() {
-    return 'TestResult(id: $id, folderId: $folderId, totalCount: $totalCount, correctCount: $correctCount, date: $date)';
+    return 'TestResult(id: $id, folderId: $folderId, totalCount: $totalCount, correctCount: $correctCount, date: $date, updatedAt: $updatedAt)';
   }
 }
 
@@ -63,7 +66,8 @@ abstract mixin class $TestResultCopyWith<$Res> {
       String folderId,
       int totalCount,
       int correctCount,
-      DateTime date});
+      DateTime date,
+      DateTime updatedAt});
 }
 
 /// @nodoc
@@ -83,6 +87,7 @@ class _$TestResultCopyWithImpl<$Res> implements $TestResultCopyWith<$Res> {
     Object? totalCount = null,
     Object? correctCount = null,
     Object? date = null,
+    Object? updatedAt = null,
   }) {
     return _then(_self.copyWith(
       id: null == id
@@ -104,6 +109,10 @@ class _$TestResultCopyWithImpl<$Res> implements $TestResultCopyWith<$Res> {
       date: null == date
           ? _self.date
           : date // ignore: cast_nullable_to_non_nullable
+              as DateTime,
+      updatedAt: null == updatedAt
+          ? _self.updatedAt
+          : updatedAt // ignore: cast_nullable_to_non_nullable
               as DateTime,
     ));
   }
@@ -203,7 +212,7 @@ extension TestResultPatterns on TestResult {
   @optionalTypeArgs
   TResult maybeWhen<TResult extends Object?>(
     TResult Function(String id, String folderId, int totalCount,
-            int correctCount, DateTime date)?
+            int correctCount, DateTime date, DateTime updatedAt)?
         $default, {
     required TResult orElse(),
   }) {
@@ -211,7 +220,7 @@ extension TestResultPatterns on TestResult {
     switch (_that) {
       case _TestResult() when $default != null:
         return $default(_that.id, _that.folderId, _that.totalCount,
-            _that.correctCount, _that.date);
+            _that.correctCount, _that.date, _that.updatedAt);
       case _:
         return orElse();
     }
@@ -233,14 +242,14 @@ extension TestResultPatterns on TestResult {
   @optionalTypeArgs
   TResult when<TResult extends Object?>(
     TResult Function(String id, String folderId, int totalCount,
-            int correctCount, DateTime date)
+            int correctCount, DateTime date, DateTime updatedAt)
         $default,
   ) {
     final _that = this;
     switch (_that) {
       case _TestResult():
         return $default(_that.id, _that.folderId, _that.totalCount,
-            _that.correctCount, _that.date);
+            _that.correctCount, _that.date, _that.updatedAt);
       case _:
         throw StateError('Unexpected subclass');
     }
@@ -261,14 +270,14 @@ extension TestResultPatterns on TestResult {
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>(
     TResult? Function(String id, String folderId, int totalCount,
-            int correctCount, DateTime date)?
+            int correctCount, DateTime date, DateTime updatedAt)?
         $default,
   ) {
     final _that = this;
     switch (_that) {
       case _TestResult() when $default != null:
         return $default(_that.id, _that.folderId, _that.totalCount,
-            _that.correctCount, _that.date);
+            _that.correctCount, _that.date, _that.updatedAt);
       case _:
         return null;
     }
@@ -283,7 +292,8 @@ class _TestResult extends TestResult {
       required this.folderId,
       required this.totalCount,
       required this.correctCount,
-      required this.date})
+      required this.date,
+      required this.updatedAt})
       : super._();
 
   @override
@@ -296,6 +306,8 @@ class _TestResult extends TestResult {
   final int correctCount;
   @override
   final DateTime date;
+  @override
+  final DateTime updatedAt;
 
   /// Create a copy of TestResult
   /// with the given fields replaced by the non-null parameter values.
@@ -317,16 +329,18 @@ class _TestResult extends TestResult {
                 other.totalCount == totalCount) &&
             (identical(other.correctCount, correctCount) ||
                 other.correctCount == correctCount) &&
-            (identical(other.date, date) || other.date == date));
+            (identical(other.date, date) || other.date == date) &&
+            (identical(other.updatedAt, updatedAt) ||
+                other.updatedAt == updatedAt));
   }
 
   @override
-  int get hashCode =>
-      Object.hash(runtimeType, id, folderId, totalCount, correctCount, date);
+  int get hashCode => Object.hash(
+      runtimeType, id, folderId, totalCount, correctCount, date, updatedAt);
 
   @override
   String toString() {
-    return 'TestResult(id: $id, folderId: $folderId, totalCount: $totalCount, correctCount: $correctCount, date: $date)';
+    return 'TestResult(id: $id, folderId: $folderId, totalCount: $totalCount, correctCount: $correctCount, date: $date, updatedAt: $updatedAt)';
   }
 }
 
@@ -343,7 +357,8 @@ abstract mixin class _$TestResultCopyWith<$Res>
       String folderId,
       int totalCount,
       int correctCount,
-      DateTime date});
+      DateTime date,
+      DateTime updatedAt});
 }
 
 /// @nodoc
@@ -363,6 +378,7 @@ class __$TestResultCopyWithImpl<$Res> implements _$TestResultCopyWith<$Res> {
     Object? totalCount = null,
     Object? correctCount = null,
     Object? date = null,
+    Object? updatedAt = null,
   }) {
     return _then(_TestResult(
       id: null == id
@@ -384,6 +400,10 @@ class __$TestResultCopyWithImpl<$Res> implements _$TestResultCopyWith<$Res> {
       date: null == date
           ? _self.date
           : date // ignore: cast_nullable_to_non_nullable
+              as DateTime,
+      updatedAt: null == updatedAt
+          ? _self.updatedAt
+          : updatedAt // ignore: cast_nullable_to_non_nullable
               as DateTime,
     ));
   }

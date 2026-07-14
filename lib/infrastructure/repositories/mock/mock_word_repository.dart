@@ -18,18 +18,21 @@ class MockWordRepository implements WordRepository {
         front: 'apple',
         back: 'りんご',
         createdAt: DateTime.now().subtract(const Duration(days: 2)),
+        updatedAt: DateTime.now().subtract(const Duration(days: 2)),
       ),
       Word(
         id: 'word-2',
         front: 'banana',
         back: 'バナナ',
         createdAt: DateTime.now().subtract(const Duration(days: 2)),
+        updatedAt: DateTime.now().subtract(const Duration(days: 2)),
       ),
       Word(
         id: 'word-3',
         front: 'cherry',
         back: 'さくらんぼ',
         createdAt: DateTime.now().subtract(const Duration(days: 1)),
+        updatedAt: DateTime.now().subtract(const Duration(days: 1)),
       ),
     ];
     _store['$userId/folder-2'] = [
@@ -38,12 +41,14 @@ class MockWordRepository implements WordRepository {
         front: 'accomplish',
         back: '達成する・成し遂げる',
         createdAt: DateTime.now().subtract(const Duration(days: 1)),
+        updatedAt: DateTime.now().subtract(const Duration(days: 1)),
       ),
       Word(
         id: 'word-5',
         front: 'adequate',
         back: '十分な・適切な',
         createdAt: DateTime.now().subtract(const Duration(days: 1)),
+        updatedAt: DateTime.now().subtract(const Duration(days: 1)),
       ),
     ];
   }
@@ -70,11 +75,13 @@ class MockWordRepository implements WordRepository {
     required String back,
   }) async {
     await Future.delayed(const Duration(milliseconds: 200));
+    final now = DateTime.now();
     final word = Word(
       id: 'word-${_idCounter++}',
       front: front,
       back: back,
-      createdAt: DateTime.now(),
+      createdAt: now,
+      updatedAt: now,
     );
     _words(userId, folderId).add(word);
     return Right(word);
@@ -92,7 +99,7 @@ class MockWordRepository implements WordRepository {
     final list = _words(userId, folderId);
     final idx = list.indexWhere((w) => w.id == wordId);
     if (idx == -1) return const Left(Failure.notFound());
-    final updated = list[idx].copyWith(front: front, back: back);
+    final updated = list[idx].copyWith(front: front, back: back, updatedAt: DateTime.now());
     list[idx] = updated;
     return Right(updated);
   }

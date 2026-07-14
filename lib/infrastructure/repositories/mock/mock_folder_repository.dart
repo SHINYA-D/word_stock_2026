@@ -16,12 +16,14 @@ class MockFolderRepository implements FolderRepository {
         name: '英単語',
         parentFolderId: null,
         createdAt: DateTime.now().subtract(const Duration(days: 3)),
+        updatedAt: DateTime.now().subtract(const Duration(days: 3)),
       ),
       Folder(
         id: 'folder-2',
         name: 'TOEIC 頻出',
         parentFolderId: null,
         createdAt: DateTime.now().subtract(const Duration(days: 2)),
+        updatedAt: DateTime.now().subtract(const Duration(days: 2)),
       ),
     ];
   }
@@ -49,11 +51,13 @@ class MockFolderRepository implements FolderRepository {
     String? parentFolderId,
   }) async {
     await Future.delayed(const Duration(milliseconds: 200));
+    final now = DateTime.now();
     final folder = Folder(
       id: 'folder-${_idCounter++}',
       name: name,
       parentFolderId: parentFolderId,
-      createdAt: DateTime.now(),
+      createdAt: now,
+      updatedAt: now,
     );
     _userFolders(userId).add(folder);
     return Right(folder);
@@ -69,7 +73,7 @@ class MockFolderRepository implements FolderRepository {
     final list = _userFolders(userId);
     final idx = list.indexWhere((f) => f.id == folderId);
     if (idx == -1) return const Left(Failure.notFound());
-    final updated = list[idx].copyWith(name: name);
+    final updated = list[idx].copyWith(name: name, updatedAt: DateTime.now());
     list[idx] = updated;
     return Right(updated);
   }
